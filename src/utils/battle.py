@@ -93,3 +93,63 @@ def cancel_learning_move():
         return True
 
     return False
+
+
+
+def is_pokemon_fainted():
+    """Determines if a pokemon has fainted.
+
+    Args:
+        NONE
+
+    Returns:
+        NONE
+    """
+    is_fainted = pyautogui.locateOnScreen('../../assets/fainted.PNG', confidence=0.9)
+
+    if is_fainted == None:
+        return False
+    
+    return True
+
+
+def switch_fainted_pokemon_out(pokemon):
+    """Switch the fainted pokemon out.
+
+    Args:
+        pokemon - Index of the new pokemon to switch in.
+
+    returns:
+        boolean - True if successfully switched pokemon in. Otherwise false.
+    """
+    print('Debug')
+    if pokemon == 1:
+        pyautogui.press('right')
+        pyautogui.press('z')
+        return True
+    
+    if pokemon == 2:
+        pyautogui.press('right')
+        pyautogui.press('right')
+        pyautogui.press('z')
+        return True
+
+    if pokemon == 3:
+        pyautogui.press('down')
+        pyautogui.press('z')
+        return True
+
+    if pokemon == 4:
+        pyautogui.press('down')
+        pyautogui.press('right')
+        pyautogui.press('z')
+        return True
+
+    if pokemon == 5:
+        pyautogui.press('down')
+        pyautogui.press('right')
+        pyautogui.press('right')
+        pyautogui.press('z')
+        return True
+    
+    return False

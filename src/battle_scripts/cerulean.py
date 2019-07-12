@@ -6,7 +6,7 @@ import time
 
 
 BATTLES = 0
-
+NEXT_AVAILABLE_PKMN = 1
 
 
 def goto_pokemon_centre():
@@ -20,8 +20,9 @@ def goto_pokemon_centre():
     run_to(face='down', direction='right', steps=4)
     run_to(face='right', direction='up', steps=4)
     
+    pause_input(3)
     while(not is_character_visible()):
-        pause_input(1)
+        pause_input(3)
 
     run_to(face='', direction='up', steps=4)
     hold_key('z', 5)
@@ -31,8 +32,9 @@ def goto_pokemon_centre():
 def exit_pokemon_centre():
     run_to(face='up', direction='down', steps=5)
 
+    pause_input(3)
     while(not is_character_visible()):
-        pause_input(1)
+        pause_input(3)
 
     run_to(face='down', direction='down', steps=3)
     run_to(face='down', direction='left', steps=4)
@@ -50,7 +52,7 @@ pause_input(2)
 focus_window()
 
 #Start in Cerulean pokemon centre with character at desk facing nurse
-exit_pokemon_centre()
+#exit_pokemon_centre()
 
 while True:
     while is_character_visible():
@@ -63,23 +65,30 @@ while True:
 
             while not is_character_visible():
                 fight_button = in_battle()
+                
+                if is_pokemon_fainted():
+                    switch_fainted_pokemon_out(NEXT_AVAILABLE_PKMN)
+                    NEXT_AVAILABLE_PKMN = NEXT_AVAILABLE_PKMN + 1
 
                 if bool(fight_button):
                     pyautogui.click(in_battle().x, in_battle().y)
                     select_move(0)
     
-    print('Fought ' + str(BATTLES) + ' so far...')
+    print('Fought ' + str(BATTLES) + ' battles so far...')
 
     while BATTLES % 5 == 0 and BATTLES > 0:
         p_time = time.time()
+        return_delay = 10
 
-        while time.time() - p_time < 10:
+        while time.time() - p_time < return_delay:
             run_to(direction='right', steps=5)
             if not is_character_visible():
+                return_delay = return_delay + 3
                 pyautogui.press('x')
                 run()
 
         goto_pokemon_centre()
+        NEXT_AVAILABLE_PKMN = 1
         exit_pokemon_centre()
         break
 
