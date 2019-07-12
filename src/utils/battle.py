@@ -1,3 +1,4 @@
+from src.utils.general import pause_input
 import pyautogui
 
 
@@ -35,6 +36,27 @@ def run():
         point = pyautogui.center(run_button)
         pyautogui.click(point.x, point.y)
         print('Ran away from battle!')
+
+
+
+def check_pp(next_move):
+    """Check if the pokemon is out of pp. Need about one second delay before calling this function.
+
+    Args:
+        next_move - Index of next move to use instead.
+
+    Returns:
+        boolean - True if no pp, otherwise false.
+    """
+    pp = pyautogui.locateOnScreen('../../assets/no_pp.PNG', confidence=0.75)
+
+    if pp == None:
+        return False
+
+    pause_input(3)
+    pyautogui.press('z')
+    select_move(next_move)
+    return True
 
 
 
@@ -122,7 +144,6 @@ def switch_fainted_pokemon_out(pokemon):
     returns:
         boolean - True if successfully switched pokemon in. Otherwise false.
     """
-    print('Debug')
     if pokemon == 1:
         pyautogui.press('right')
         pyautogui.press('z')

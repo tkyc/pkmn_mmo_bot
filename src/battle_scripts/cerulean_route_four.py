@@ -7,6 +7,7 @@ import time
 
 BATTLES = 0
 NEXT_AVAILABLE_PKMN = 1
+NEXT_MOVE = 1
 
 
 def goto_pokemon_centre():
@@ -47,11 +48,12 @@ def exit_pokemon_centre():
     run_to(face='left', direction='up', steps=2)
 
 
-
+#START
 pause_input(2)
 focus_window()
 
 #Start in Cerulean pokemon centre with character at desk facing nurse
+#Screen size should be 1280 x 960
 #exit_pokemon_centre()
 
 while True:
@@ -60,12 +62,14 @@ while True:
         run_to(face='left', direction='right', steps=5)
 
     while not is_character_visible():
+        is_character_stacked('left')
         if bool(in_battle()):
             BATTLES = BATTLES + 1
 
             while not is_character_visible():
+                is_character_stacked('left')
                 fight_button = in_battle()
-                
+
                 if is_pokemon_fainted():
                     switch_fainted_pokemon_out(NEXT_AVAILABLE_PKMN)
                     NEXT_AVAILABLE_PKMN = NEXT_AVAILABLE_PKMN + 1
@@ -73,16 +77,19 @@ while True:
                 if bool(fight_button):
                     pyautogui.click(in_battle().x, in_battle().y)
                     select_move(0)
+                    pause_input(1)
+                    check_pp(NEXT_MOVE)
     
     print('Fought ' + str(BATTLES) + ' battles so far...')
 
-    while BATTLES % 5 == 0 and BATTLES > 0:
+    while BATTLES % 15 == 0 and BATTLES > 0:
         p_time = time.time()
         return_delay = 10
 
         while time.time() - p_time < return_delay:
             run_to(direction='right', steps=5)
             if not is_character_visible():
+                is_character_stacked('left')
                 return_delay = return_delay + 3
                 pyautogui.press('x')
                 run()
@@ -91,18 +98,4 @@ while True:
         NEXT_AVAILABLE_PKMN = 1
         exit_pokemon_centre()
         break
-
-    # steps = 0
-    # while PP_USED % 11 == 0:
-    #     run_to(direction='right', steps=5)
-        
-    #     if not is_character_visible():
-    #         pyautogui.press('x')
-    #         run()
-
-    #     steps = steps + 1
-    #     if steps % 7 == 0:
-    #         goto_pokemon_centre()
-    #         exit_pokemon_centre()
-    #         PP_USED = 1
-    #         break
+#END

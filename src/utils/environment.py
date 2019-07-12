@@ -1,4 +1,15 @@
+from src.utils.battle import in_battle
 import pyautogui
+
+
+#TESTING
+def is_character_stacked(direction):
+    if not is_character_visible():
+        if not bool(in_battle()):
+            print('Character sprite is stacked...')
+            run_to(direction=direction, steps=2)
+            return True
+    return False
 
 
 
