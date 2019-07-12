@@ -11,10 +11,10 @@ def is_character_visible():
     Returns:
         boolean - True if visible, otherwise false.
     """
-    character_f = pyautogui.locateOnScreen('../assets/character.PNG', confidence=0.65)
-    character_b = pyautogui.locateOnScreen('../assets/character_b.PNG', confidence=0.65)
-    character_l = pyautogui.locateOnScreen('../assets/character_l.PNG', confidence=0.65)
-    character_r = pyautogui.locateOnScreen('../assets/character_r.PNG', confidence=0.65)
+    character_f = pyautogui.locateOnScreen('../../assets/character.PNG', confidence=0.65)
+    character_b = pyautogui.locateOnScreen('../../assets/character_b.PNG', confidence=0.65)
+    character_l = pyautogui.locateOnScreen('../../assets/character_l.PNG', confidence=0.65)
+    character_r = pyautogui.locateOnScreen('../../assets/character_r.PNG', confidence=0.65)
 
     print('Checking if character is visible...')
     if character_f == None and character_b == None and character_l == None and character_r == None:
@@ -26,7 +26,7 @@ def is_character_visible():
 
 
 
-def run_to(face, direction, steps):
+def run_to(direction, steps, face=None):
     """Run in the specified cardinal direction.
 
     Args:
@@ -54,7 +54,7 @@ def run_to(face, direction, steps):
 
 
 
-def walk_to(face, direction, steps):
+def walk_to(direction, steps, face=None):
     """Moves character in the specified cardinal direction.
        The expected number of steps work only for walking.
 

@@ -11,7 +11,7 @@ def in_battle():
     Returns:
         (x, y) - The fight button x and y coordinates as a tuple. Otherwise returns None.
     """
-    fight_button = pyautogui.locateOnScreen('../assets/fight.PNG', confidence=0.85)
+    fight_button = pyautogui.locateOnScreen('../../assets/fight.PNG', confidence=0.85)
     
     if fight_button == None:
         return None
@@ -29,7 +29,7 @@ def run():
     Returns:
         (x, y) - The run button x and y coordinates as a tuple. Otherwise returns None.
     """
-    run_button = pyautogui.locateOnScreen('../assets/run.PNG', confidence=0.85)
+    run_button = pyautogui.locateOnScreen('../../assets/run.PNG', confidence=0.85)
 
     if run_button != None:
         point = pyautogui.center(run_button)
@@ -77,16 +77,16 @@ def cancel_learning_move():
     Return:
         boolean - True on successful cancellation, otherwise false.
     """
-    new_move = pyautogui.locateOnScreen('../assets/new_move.PNG', confidence=0.9)
+    new_move = pyautogui.locateOnScreen('../../assets/new_move.PNG', confidence=0.9)
 
     if new_move != None:
-        cancel_button = pyautogui.locateOnScreen('../assets/cancel.PNG', confidence=0.9)
+        cancel_button = pyautogui.locateOnScreen('../../assets/cancel.PNG', confidence=0.9)
 
         if cancel_button != None:
             cancel_point = pyautogui.center(cancel_button)
             pyautogui.click(cancel_point.x, cancel_point.y)
             pause_input(2)
-            yes_button = pyautogui.locateOnScreen('../assets/yes.PNG', confidence=0.9)
+            yes_button = pyautogui.locateOnScreen('../../assets/yes.PNG', confidence=0.9)
             point = pyautogui.center(yes_button)
             pyautogui.click(point.x, point.y)
         

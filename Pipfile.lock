@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0e1397cf3c629c3e2b3c2c65d693f036f6dc1ce7fc341eec0dd93148f3cb9758"
+            "sha256": "fd70ba7fc9c6931ad35c1f423d16979e3506925f30993876b13f707cdb60ed8f"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -107,6 +107,10 @@
                 "sha256:f8dc19d92896558f9c4317ee365729ead9d7bbcf2052a9a19a3ef17abbb8ac5b"
             ],
             "version": "==6.1.0"
+        },
+        "pkmn-mmo-bot": {
+            "editable": true,
+            "path": "."
         },
         "pyautogui": {
             "hashes": [

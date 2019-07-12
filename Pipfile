@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 pyautogui = "*"
 opencv-python = "*"
+pkmn-mmo-bot = {editable = true,path = "."}
 
 [requires]
 python_version = "3.7"
