@@ -4,8 +4,10 @@ import pyautogui
 
 #TESTING
 def is_character_stacked(direction):
+    battle_chatbox = pyautogui.locateOnScreen('../../assets/battle_chatbox.PNG', confidence=0.85)
+
     if not is_character_visible():
-        if not bool(in_battle()):
+        if not bool(in_battle()) and battle_chatbox == None:
             print('Character sprite is stacked...')
             run_to(direction=direction, steps=2)
             return True

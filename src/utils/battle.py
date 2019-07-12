@@ -4,7 +4,7 @@ import pyautogui
 
 
 def in_battle():
-    """Determines if a pokemon battle is occurring by checking for the fight button.
+    """Determines if a pokemon battle is occurring.
 
     Args:
         NONE
@@ -13,11 +13,17 @@ def in_battle():
         (x, y) - The fight button x and y coordinates as a tuple. Otherwise returns None.
     """
     fight_button = pyautogui.locateOnScreen('../../assets/fight.PNG', confidence=0.85)
+    battle_chatbox = pyautogui.locateOnScreen('../../assets/battle_chatbox.PNG', confidence=0.85)
     
-    if fight_button == None:
+    if fight_button == None and battle_chatbox == None:
+        print('Not in battle...')
         return None
-
-    return pyautogui.center(fight_button)
+    elif fight_button != None:
+        print('In battle, returning FIGHT option...')
+        return pyautogui.center(fight_button)
+    elif fight_button == None and battle_chatbox != None:
+        print('In battle, waiting for FIGHT option...')
+        return None
 
 
 
@@ -38,7 +44,7 @@ def run():
         print('Ran away from battle!')
 
 
-
+#TODO
 def check_pp(next_move):
     """Check if the pokemon is out of pp. Need about one second delay before calling this function.
 
@@ -46,12 +52,12 @@ def check_pp(next_move):
         next_move - Index of next move to use instead.
 
     Returns:
-        boolean - True if no pp, otherwise false.
+        move - The move to use if no pp. Otherwise keep using previous move.
     """
-    pp = pyautogui.locateOnScreen('../../assets/no_pp.PNG', confidence=0.75)
+    no_pp = pyautogui.locateOnScreen('../../assets/no_pp.PNG', confidence=0.75)
 
-    if pp == None:
-        return False
+    if no_pp == None:
+        return False 
 
     pause_input(3)
     pyautogui.press('z')
