@@ -1,4 +1,6 @@
 from utils.general import *
+from utils.environment import *
+from utils.battle import *
 
 PP_USED = 1
 
