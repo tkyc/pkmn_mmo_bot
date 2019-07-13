@@ -25,7 +25,7 @@ def focus_window():
     Returns:
         NONE
     """
-    pkmn_mmo = pyautogui.locateOnScreen('../../assets/pkmn_mmo.PNG', grayscale=True, confidence=0.9)
+    pkmn_mmo = pyautogui.locateOnScreen('../../assets/pkmn_mmo.PNG', grayscale=True, confidence=0.7)
 
     if pkmn_mmo != None:
         point = pyautogui.center(pkmn_mmo)

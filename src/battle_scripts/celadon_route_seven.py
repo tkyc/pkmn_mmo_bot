@@ -15,15 +15,11 @@ MOVE = 0
 
 
 def goto_pokemon_centre():
-    run_to(direction='down', steps=2)
-    run_to(face='down', direction='right', steps=6)
-    run_to(face='right', direction='up', steps=6)
-    run_to(face='up', direction='right', steps=22)
-    run_to(face='right', direction='down', steps=8)
-    run_to(face='down', direction='right', steps=11)
-    run_to(face='right', direction='up', steps=6)
-    run_to(face='down', direction='right', steps=4)
-    run_to(face='right', direction='up', steps=4)
+    run_to(direction='down', steps=3)
+    run_to(face='down', direction='left', steps=5)
+    run_to(face='left', direction='up', steps=5)
+    run_to(face='up', direction='left', steps=18)
+    run_to(face='left', direction='up', steps=3)
     
     pause_input(3)
     while(not is_character_visible()):
@@ -41,15 +37,9 @@ def exit_pokemon_centre():
     while(not is_character_visible()):
         pause_input(3)
 
-    run_to(face='down', direction='down', steps=3)
-    run_to(face='down', direction='left', steps=4)
-    run_to(face='left', direction='down', steps=6)
-    run_to(face='down', direction='left', steps=11)
-    run_to(face='left', direction='up', steps=8)
-    run_to(face='up', direction='left', steps=22)
-    run_to(face='left', direction='down', steps=6)
-    run_to(face='down', direction='left', steps=6)
-    run_to(face='left', direction='up', steps=2)
+    run_to(face='down', direction='right', steps=18)
+    run_to(face='right', direction='down', steps=4)
+    run_to(face='down', direction='right', steps=4)
 
 
 
@@ -59,12 +49,12 @@ focus_window()
 
 #Start in Cerulean pokemon centre with character at desk facing nurse
 #Screen size should be 1280 x 960, disable overworld
-exit_pokemon_centre()
+# exit_pokemon_centre()
 
 while True:
     while is_character_visible():
-        run_to(direction='left', steps=5)
-        run_to(face='left', direction='right', steps=5)
+        run_to(direction='left', steps=7)
+        run_to(face='left', direction='right', steps=7)
 
     while not is_character_visible():
         is_character_stacked('right')
@@ -92,9 +82,9 @@ while True:
         return_delay = 10
 
         while time.time() - p_time < return_delay:
-            run_to(direction='right', steps=5)
+            run_to(direction='left', steps=5)
             if not is_character_visible():
-                is_character_stacked('right')
+                is_character_stacked('left')
                 return_delay = return_delay + 3
                 pyautogui.press('x')
                 run()

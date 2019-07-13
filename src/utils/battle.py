@@ -92,6 +92,8 @@ def select_move(move):
         pyautogui.press('down')
     
     pyautogui.press('z')
+    #Second press is for horde battles
+    pyautogui.press('z')
     print("Your pokemon used move: " + str(move) + '.')
 
 
