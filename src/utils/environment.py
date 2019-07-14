@@ -1,6 +1,6 @@
 from src.utils.battle import in_battle
 import pyautogui
-
+import time
 
 #TESTING
 def is_character_stacked(direction):
@@ -39,6 +39,34 @@ def is_character_visible():
 
 
 
+#TESTING
+def bike_to(direction, steps, face=None):
+    """Bike in the specified cardinal direction.
+
+    Args:
+        face - The direction the character is currently facing.
+        direction - The direction the character should bike in.
+        steps - The number of steps to bike.
+
+    Returns:
+        NONE
+    """    
+    def take_step(direction_):
+        p_time = time.time()
+
+        while time.time() - p_time < 0.014:
+            pyautogui.keyDown(direction_)
+        pyautogui.keyUp(direction_)
+
+    if face != direction:
+        pyautogui.keyDown(direction)
+        pyautogui.keyUp(direction)
+
+    for i in range(steps):
+        take_step(direction)
+
+
+
 def run_to(direction, steps, face=None):
     """Run in the specified cardinal direction.
 
@@ -51,18 +79,7 @@ def run_to(direction, steps, face=None):
         NONE
     """
     pyautogui.keyDown('x')
-
-    def take_step(direction_):
-        pyautogui.keyDown(direction)
-        pyautogui.keyUp(direction)
-    
-    #If not facing the intended direction, make a correction.
-    if face != direction:
-        pyautogui.keyDown(direction)
-        pyautogui.keyUp(direction)
-
-    for i in range(steps):
-        take_step(direction)
+    walk_to(direction, steps, face)
     pyautogui.keyUp('x')
 
 

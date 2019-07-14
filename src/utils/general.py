@@ -67,3 +67,8 @@ def hold_key(key, seconds):
         pyautogui.keyDown(key)
     print('Releasing ' + key + '...')
     pyautogui.keyUp(key)
+
+
+
+def use_key_item(key):
+    pyautogui.press(key)
