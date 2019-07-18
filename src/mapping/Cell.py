@@ -18,6 +18,9 @@ class Cell:
         self.x = x
         self.y = y
         self.prop = False
+        self.grass = False
+        self.target = False
+        self.path = False
 
 
 
