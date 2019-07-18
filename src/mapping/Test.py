@@ -21,19 +21,10 @@ from Map import Map
 #Disabling multitouch
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
-class TouchMixin(object):
-
-    def __init__(self, *args, **kwargs):
-        super(TouchMixin, self).__init__(*args, **kwargs)
-        self.register_event_type('touch_down')
-
-    def touch_down(self, touch):
-        pass
-
 class CellWidget(Button):
 
     #Cell size
-    cell_size = 35
+    cell_size = 17
 
     def __init__(self, row, col, **kwargs):
         super(CellWidget, self).__init__(**kwargs, size_hint=(None, None), size=(self.cell_size, self.cell_size))
@@ -47,37 +38,56 @@ class CellWidget(Button):
 class MapWidget(GridLayout):
 
     #Map size
-    map_size = 100
+    map_size = 50
 
     def __init__(self, **kwargs):
-        GridLayout.__init__(self, size_hint=(1, 1 - 175 / 805), rows=self.map_size, cols=self.map_size, pos=(0, 3045))
+        GridLayout.__init__(self, rows=self.map_size, cols=self.map_size)
         for row in range(self.map_size):
             for col in range(self.map_size):
                 self.add_widget(CellWidget(row, col))
 
-class ZoomWidget(ScatterLayout):
+class ZoomWidget(ScatterLayout, Widget):
 
     def __init__(self, **kwargs):
-        ScatterLayout.__init__(self, size_hint=(1, 1 - 175 / 805), pos=(0, 175))
+        ScatterLayout.__init__(self)
+        # self.keyboard = Window.request_keyboard(self.keyboard_closed, self)
+        # self.keyboard.bind(on_key_down=self.on_keyboard_down)
 
-    def on_touch_down(self, touch):
-        # for child in Widget.children:
-        #     if child is self: continue
-        #     if child.collide_point(*touch.pos):
-        #         return super(ZoomWidget, self).on_touch_down(touch)
-        #     else:
-        if touch.button == 'scrollup':
-            if self.scale <= 1:
-                self.scale = self.scale * 0.9
-                self.w
-        if touch.button == 'scrolldown':
-            self.scale = self.scale * 1.03 if self.scale < 1 else 1
+    # def keyboard_closed(self):
+    #     self.keyboard.unbind(on_key_down=self.on_keyboard_down)
+    #     self.keyboard = None
+
+    # def on_keyboard_down(self, keyboard, keycode, text, modifiers):
+    #     if keycode[1] == 'left':
+    #         self.grid_zoom(False)
+    #     elif keycode[1] == 'right':
+    #         self.grid_zoom(True)
+
+    # def on_touch_down(self, touch):
+    #     if touch.button == 'scrollup':
+    #         self.scale = self.scale * 1.03 if self.scale <= 1 else 1
+    #         self.pos = (0, 175)
+    #     elif touch.button == 'scrolldown':
+    #         self.scale = self.scale * 0.9 if self.scale >= 0.5 else 0.5
+    #         self.pos = (0, 175)                        
+
+    # def grid_zoom(self, zoom_in):
+    #     if zoom_in:
+    #         self.scale = self.scale * 1.1
+    #         self.pos = (0, 0)
+    #     else:
+    #         self.scale = self.scale * 0.9
+    #         self.pos = (0, 0)
 
 class MappingUtilApp(App):
 
+    #Window dimensions
+    x = 850
+    y = 850
+
     def build(self):
-        #Initializing window size
-        Window.size = (805, 805)
+        #Initializing window
+        Window.size = (self.x, self.y)
         Window.bind(on_resize=self.disable_window_resize)
 
         #Root widget
@@ -91,8 +101,8 @@ class MappingUtilApp(App):
         return root
 
     def disable_window_resize(self, instance, x, y):
-        if x != 805 or y != 805:
-            Window.size = (805, 805)
+        if x != self.x or y != self.y:
+            Window.size = (self.x, self.y)
 
 if __name__ == '__main__':
     MappingUtilApp().run()
