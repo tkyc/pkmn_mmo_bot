@@ -3,7 +3,7 @@ from kivy.uix.widget import Widget
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scatterlayout import ScatterLayout
-from kivy.uix.actionbar import ActionBar, ActionItem, ActionButton, ActionGroup, ActionView, ActionPrevious
+from kivy.uix.actionbar import ActionBar, ActionItem, ActionButton, ActionGroup, ActionView, ActionPrevious, ActionDropDown
 from kivy.uix.button import Button
 from kivy.config import Config
 from kivy.core.window import Window
@@ -18,6 +18,9 @@ from Cell import Cell
 
 #Disabling multitouch
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
+
+#Actionbar height
+actionbar_height = 50
 
 class CellWidget(Button):
 
@@ -38,12 +41,26 @@ class CellWidget(Button):
 
     def __init__(self, row, col, **kwargs):
         super(CellWidget, self).__init__(**kwargs, size_hint=(None, None), size=(self.cell_size, self.cell_size))
-        self.bind(on_press=self.callback)
+        self.bind(on_press=self.set_cell_colour)
+        self.cell_type = 0
         self.row = row
         self.col = col
 
-    def callback(self, instance):
-        self.background_color = self.grass
+    def set_cell_colour(self, instance):
+        if self.cell_type == 0:
+            self.background_color = self.grass
+        elif self.cell_type == 1:
+            self.background_color = self.prop
+        elif self.cell_type == 2:
+            self.background_color = self.target
+        elif self.cell_type == 3:
+            self.background_color = self.path
+
+    def set_cell_type(self, cell_type):
+        self.cell_type = cell_type
+
+    def print_cell_coordinates(self, instance):
+        print('(' + str(self.row) + ', ' + str(self.col) + ')')
 
 class MapWidget(GridLayout):
 
@@ -51,7 +68,7 @@ class MapWidget(GridLayout):
     map_size = NumericProperty(50)
 
     def __init__(self, **kwargs):
-        GridLayout.__init__(self, rows=self.map_size, cols=self.map_size)
+        GridLayout.__init__(self, rows=self.map_size, cols=self.map_size, pos_hint={'top': 1 - actionbar_height / Window.size[1]})
         for row in range(self.map_size):
             for col in range(self.map_size):
                 self.add_widget(CellWidget(row, col))
@@ -93,7 +110,7 @@ class MappingUtilApp(App):
 
     #Window dimensions
     x = NumericProperty(850)
-    y = NumericProperty(850)
+    y = NumericProperty(900)
 
     def build(self):
         #Initializing window
@@ -105,24 +122,58 @@ class MappingUtilApp(App):
 
         #The interactive map
         interactive_map = MapWidget()
-        # root.add_widget(interactive_map)
-        actionbar = ActionBar()
-        action_view = ActionView()
-        action_group = ActionGroup()
+        root.add_widget(interactive_map)
+        self.map_gui = interactive_map
 
-        action_group.add_widget(ActionButton(text='tool 1'))
-        action_group.add_widget(ActionButton(text='tool 2'))
+        #Action bar
+        root.add_widget(self.create_actionbar())
 
-        action_view.add_widget(ActionPrevious(with_previous=False))
-        action_view.add_widget(action_group)
-        actionbar.add_widget(action_view)
-        
-        root.add_widget(actionbar)
         return root
+
+    def create_actionbar(self):
+        #Actionbar initialization
+        actionbar = ActionBar(pos_hint={'top': 1})
+        action_view = ActionView()
+
+        #Spinner initialization
+        spinner = ActionGroup(mode='spinner', text='Select')
+        grass = ActionButton(text='Grass cell', on_press=self.select_grass)
+        prop = ActionButton(text='Prop cell', on_press=self.select_prop)
+        target = ActionButton(text='Target cell', on_press=self.select_target)
+        path = ActionButton(text='Path cell', on_press=self.select_path)
+
+        #Add buttons to spinner
+        spinner.add_widget(grass)
+        spinner.add_widget(prop)
+        spinner.add_widget(target)
+        spinner.add_widget(path)
+
+        #Add widgets to actionbar
+        action_view.add_widget(spinner)
+        action_view.add_widget(ActionPrevious(with_previous=False))
+        actionbar.add_widget(action_view)
+
+        return actionbar
 
     def disable_window_resize(self, instance, x, y):
         if x != self.x or y != self.y:
             Window.size = (self.x, self.y)
+
+    def select_grass(self, isinstance):
+        for child in self.map_gui.children:
+            child.set_cell_type(0)
+
+    def select_prop(self, instance):
+        for child in self.map_gui.children:
+            child.set_cell_type(1)
+
+    def select_target(self, instance):
+        for child in self.map_gui.children:
+            child.set_cell_type(2)
+
+    def select_path(self, instance):
+        for child in self.map_gui.children:
+            child.set_cell_type(3)
 
 if __name__ == '__main__':
     MappingUtilApp().run()
