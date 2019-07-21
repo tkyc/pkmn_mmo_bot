@@ -1,23 +1,19 @@
 from Cell import Cell
 
-
-
 class Map:
 
-
-
-    def __init__(self, rows, columns):
+    def __init__(self, rows, cols):
         """Constructor.
 
         Args:
             rows - Number of rows.
-            columns - Number of columns.
+            cols - Number of columns.
 
         Returns:
             NONE
         """
         self.rows = rows
-        self.columns = columns
+        self.cols = cols
         self.matrix = [[Cell(row, column) for column in range(columns)] for row in range(rows)]
 
 
