@@ -62,28 +62,43 @@ class CellWidget(Button, Cell):
         """
         super(CellWidget, self).__init__(size_hint=(None, None), size=(self.cell_size, self.cell_size), row=row, col=col)
         self.bind(on_press=self.set_cell)
-        self.enabled_colour = None
+
+        #Default cell type selection
+        self.enabled_colour = CellType.PATH
 
 
 
     def set_cell(self, instance):
         """Callback for enabling the cell colour and sets the cell type if the cell is clicked.
+           Clicking an already set cell will reset that cell.
 
         Args:
-            NONE
+            instance - N/A
 
         Return:
             NONE
         """
-        if self.enabled_colour == CellType.GRASS:
+        #Resets cell
+        if self.cell_type != None:
+            self.background_color = (1, 1, 1, 1)
+            self.cell_type = None
+
+        #Grass cell
+        elif self.enabled_colour == CellType.GRASS:
             self.background_color = self.grass
             self.cell_type = CellType.GRASS
+
+        #Prop cell
         elif self.enabled_colour == CellType.PROP:
             self.background_color = self.prop
             self.cell_type = CellType.PROP
+
+        #Target cell
         elif self.enabled_colour == CellType.TARGET:
             self.background_color = self.target
             self.cell_type = CellType.TARGET
+
+        #Path cell
         elif self.enabled_colour == CellType.PATH:
             self.background_color = self.path
             self.cell_type = CellType.PATH
@@ -94,7 +109,7 @@ class CellWidget(Button, Cell):
         """Prints the cell's row and column indexes.
         
         Args:
-            NONE
+            instance - N/A
 
         Return:
             NONE
@@ -137,6 +152,21 @@ class MapWidget(GridLayout):
         """
         for child in self.children:
             child.enabled_colour = colour
+
+
+
+    def clear_map(self, instance):
+        """Clears the map and resets cell type.
+
+        Args:
+            NONE
+
+        Return:
+            NONE
+        """
+        for child in self.children:
+            child.background_color = (1, 1, 1, 1)
+            child.cell_type = None
 
 
 
@@ -191,7 +221,7 @@ class ZoomWidget(ScatterLayout, Widget):
 
 
     # def on_touch_down(self, touch):
-    #     """Handles events withing the app. Overrides Widget class' on_touch_down.
+    #     """Handles instances withing the app. Overrides Widget class' on_touch_down.
 
     #     Args:
     #         NONE
@@ -272,10 +302,10 @@ class MappingUtilApp(App):
 
         #Spinner initialization
         spinner = ActionGroup(mode='spinner', text='Select')
-        grass = ActionButton(text='Grass cell', on_press=self.select_grass)
-        prop = ActionButton(text='Prop cell', on_press=self.select_prop)
-        target = ActionButton(text='Target cell', on_press=self.select_target)
-        path = ActionButton(text='Path cell', on_press=self.select_path)
+        grass = ActionButton(text='Grass cell', on_press=lambda instance : self.map_gui.enable_cell_colour(CellType.GRASS))
+        prop = ActionButton(text='Prop cell', on_press=lambda instance : self.map_gui.enable_cell_colour(CellType.PROP))
+        target = ActionButton(text='Target cell', on_press=lambda instance : self.map_gui.enable_cell_colour(CellType.TARGET))
+        path = ActionButton(text='Path cell', on_press=lambda instance : self.map_gui.enable_cell_colour(CellType.PATH))
         spinner.add_widget(grass)
         spinner.add_widget(prop)
         spinner.add_widget(target)
@@ -284,7 +314,7 @@ class MappingUtilApp(App):
         #Actionbar buttons
         open = ActionButton(text='Open')
         save = ActionButton(text='Save')
-        clear = ActionButton(text='Clear')
+        clear = ActionButton(text='Clear', on_press=self.map_gui.clear_map)
 
         #Add widgets to actionbar
         action_view.add_widget(open)
@@ -302,63 +332,13 @@ class MappingUtilApp(App):
         """Disables window resizing.
 
         Args:
+            instance - N/A
             x - The window's current width.
             y - The window's current height.
         """
         if x != window_x or y != window_y:
             Window.size = (window_x, window_y)
 
-
-
-    def select_grass(self, instance):
-        """Callback for enabling selection of grass on the map/grid.
-
-        Args:
-            NONE
-
-        Return:
-            NONE
-        """
-        self.map_gui.enable_cell_colour(CellType.GRASS)
-
-
-
-    def select_prop(self, instance):
-        """Callback for enabling selection of prop on the map/grid.
-
-        Args:
-            NONE
-
-        Return:
-            NONE
-        """
-        self.map_gui.enable_cell_colour(CellType.PROP)
-
-
-
-    def select_target(self, instance):
-        """Callback for enabling selection of target on the map/grid.
-
-        Args:
-            NONE
-
-        Return:
-            NONE
-        """
-        self.map_gui.enable_cell_colour(CellType.TARGET)
-
-
-
-    def select_path(self, instance):
-        """Callback for enabling selection of path on the map/grid.
-
-        Args:
-            NONE
-
-        Return
-            NONE
-        """
-        self.map_gui.enable_cell_colour(CellType.PATH)
 
 
 #MAIN
