@@ -190,39 +190,39 @@ class ZoomWidget(ScatterLayout, Widget):
 
 
 
-    def on_touch_down(self, touch):
-        """Handles events withing the app. Overrides Widget class' on_touch_down.
+    # def on_touch_down(self, touch):
+    #     """Handles events withing the app. Overrides Widget class' on_touch_down.
 
-        Args:
-            NONE
+    #     Args:
+    #         NONE
         
-        Return:
-            NONE
-        """
-        if touch.button == 'scrollup':
-            self.scale = self.scale * 1.03 if self.scale <= 1 else 1
-            self.pos = (0, 175)
-        elif touch.button == 'scrolldown':
-            self.scale = self.scale * 0.9 if self.scale >= 0.5 else 0.5
-            self.pos = (0, 175)                        
+    #     Return:
+    #         NONE
+    #     """
+    #     if touch.button == 'scrollup':
+    #         self.scale = self.scale * 1.03 if self.scale <= 1 else 1
+    #         self.pos = (0, 175)
+    #     elif touch.button == 'scrolldown':
+    #         self.scale = self.scale * 0.9 if self.scale >= 0.5 else 0.5
+    #         self.pos = (0, 175)                        
 
 
 
-    def grid_zoom(self, zoom_in):
-        """Performs magnification of the map/grid.
+    # def grid_zoom(self, zoom_in):
+    #     """Performs magnification of the map/grid.
 
-        Args:
-            zoom_in - A boolean that determines whether to zoom in or zoom out.
+    #     Args:
+    #         zoom_in - A boolean that determines whether to zoom in or zoom out.
 
-        Return:
-            NONE
-        """
-        if zoom_in:
-            self.scale = self.scale * 1.1
-            self.pos = (0, 0)
-        else:
-            self.scale = self.scale * 0.9
-            self.pos = (0, 0)
+    #     Return:
+    #         NONE
+    #     """
+    #     if zoom_in:
+    #         self.scale = self.scale * 1.1
+    #         self.pos = (0, 0)
+    #     else:
+    #         self.scale = self.scale * 0.9
+    #         self.pos = (0, 0)
 
 
 
@@ -245,10 +245,10 @@ class MappingUtilApp(App):
         #Root widget
         root = FloatLayout()
 
-        #The interactive map
-        interactive_map = MapWidget()
-        root.add_widget(interactive_map)
-        self.map_gui = interactive_map
+        #The grid/map
+        map = MapWidget()
+        root.add_widget(map)
+        self.map_gui = map
 
         #Action bar
         root.add_widget(self.create_actionbar())
