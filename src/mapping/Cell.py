@@ -1,36 +1,30 @@
-
-
+from CellType import CellType
 
 class Cell:
 
-
-
-    def __init__(self, x, y):
+    def __init__(self, row, col):
         """Constructor.
 
         Args:
-            x - x-coordinate.
-            y - y-coordinate.
+            row - Row index of cell.
+            col - Column index of cell.
 
         Returns:
             NONE
         """
-        self.x = x
-        self.y = y
-        self.prop = False
-        self.grass = False
-        self.target = False
-        self.path = False
+        self.row = row
+        self.col = col
+        self.cell_type = None
 
 
 
-    def set_prop(self, prop):
-        """Sets prop boolean.
+    def set_cell_type(self, cell_type):
+        """Sets cell type. Default is None.
 
         Args:
-            boolean - True if the cell is a prop. Otherwise, false.
+            cell_type - The cell type.
 
         Return:
             NONE
         """
-        self.prop = prop
+        self.cell_type = cell_type

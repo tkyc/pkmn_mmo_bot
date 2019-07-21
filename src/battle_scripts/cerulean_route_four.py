@@ -58,7 +58,7 @@ pause_input(2)
 focus_window()
 
 #Start in Cerulean pokemon centre with character at desk facing nurse
-#Screen size should be 1280 x 960, disable overworld
+#Screen size should be about 1280 x 960, disable overworld
 exit_pokemon_centre()
 
 while True:

@@ -10,6 +10,7 @@ from kivy.core.window import Window
 from kivy.properties import *
 from Map import Map
 from Cell import Cell
+from CellType import CellType
 
 #(0, 0) is bottom left of the window
 
@@ -22,29 +23,26 @@ Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 #Actionbar height
 actionbar_height = 50
 
-class CellWidget(Button):
+class CellWidget(Button, Cell):
 
     #Cell size
     cell_size = NumericProperty(17)
 
-    #Grass cell
+    #Grass cell colour
     grass = ListProperty((124 / 255, 252 / 255, 0, 1))
 
-    #Path cell
+    #Path cell colour
     path = ListProperty((1, 215 / 255, 0, 1))
 
-    #Target cell
+    #Target cell colour
     target = ListProperty((1, 0, 0, 1))
 
-    #Prop cell
+    #Prop cell colour
     prop = ListProperty((0.3, 0.3, 0.3, 1))
 
     def __init__(self, row, col, **kwargs):
-        super(CellWidget, self).__init__(**kwargs, size_hint=(None, None), size=(self.cell_size, self.cell_size))
+        super(CellWidget, self).__init__(size_hint=(None, None), size=(self.cell_size, self.cell_size), row=row, col=col)
         self.bind(on_press=self.set_cell_colour)
-        self.cell_type = 0
-        self.row = row
-        self.col = col
 
     def set_cell_colour(self, instance):
         if self.cell_type == 0:
@@ -115,6 +113,7 @@ class MappingUtilApp(App):
     def build(self):
         #Initializing window
         Window.size = (self.x, self.y)
+        Window._set_window_pos(Window._get_window_pos()[0], Window._get_window_pos()[1] - 150)
         Window.bind(on_resize=self.disable_window_resize)
 
         #Root widget
@@ -141,14 +140,20 @@ class MappingUtilApp(App):
         prop = ActionButton(text='Prop cell', on_press=self.select_prop)
         target = ActionButton(text='Target cell', on_press=self.select_target)
         path = ActionButton(text='Path cell', on_press=self.select_path)
-
-        #Add buttons to spinner
         spinner.add_widget(grass)
         spinner.add_widget(prop)
         spinner.add_widget(target)
         spinner.add_widget(path)
 
+        #Actionbar buttons
+        open = ActionButton(text='Open')
+        save = ActionButton(text='Save')
+        clear = ActionButton(text='Clear')
+
         #Add widgets to actionbar
+        action_view.add_widget(open)
+        action_view.add_widget(save)
+        action_view.add_widget(clear)
         action_view.add_widget(spinner)
         action_view.add_widget(ActionPrevious(with_previous=False))
         actionbar.add_widget(action_view)
