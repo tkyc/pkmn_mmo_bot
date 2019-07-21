@@ -14,7 +14,7 @@ class Map:
         """
         self.rows = rows
         self.cols = cols
-        self.matrix = [[Cell(row, column) for column in range(columns)] for row in range(rows)]
+        self.matrix = [[None for col in range(cols)] for row in range(rows)]
 
 
 

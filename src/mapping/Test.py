@@ -1,8 +1,11 @@
 from CellType import CellType
 from Cell import Cell
+import pickle
 
-m_cell = Cell(0, 0)
-print(m_cell.cell_type)
+with open('serialized_map.config', 'rb') as serialized_map:
+    map = pickle.load(serialized_map)
 
-m_cell.set_cell_type(CellType.TARGET)
-print(m_cell.cell_type == CellType.TARGET)
+    for row in range(50):
+        for col in range(50):
+            # print('(' + str(map.matrix[row][col].row) + ', ' + str(map.matrix[row][col].col) + ')')
+            print(map.matrix[row][col].cell_type)

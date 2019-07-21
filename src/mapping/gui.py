@@ -1,3 +1,4 @@
+import pickle
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.gridlayout import GridLayout
@@ -5,6 +6,8 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scatterlayout import ScatterLayout
 from kivy.uix.actionbar import ActionBar, ActionItem, ActionButton, ActionGroup, ActionView, ActionPrevious, ActionDropDown
 from kivy.uix.button import Button
+from kivy.uix.popup import Popup
+from kivy.uix.label import Label
 from kivy.config import Config
 from kivy.core.window import Window
 from kivy.properties import *
@@ -28,6 +31,9 @@ actionbar_height = 50
 #Window dimensions
 window_x = 850
 window_y = 900
+
+#Map size (50 x 50)
+map_size = 50
 
 
 
@@ -105,11 +111,11 @@ class CellWidget(Button, Cell):
 
 
 
-    def print_cell_coordinates(self, instance):
+    def print_cell_coordinates(self):
         """Prints the cell's row and column indexes.
         
         Args:
-            instance - N/A
+            NONE
 
         Return:
             NONE
@@ -120,11 +126,6 @@ class CellWidget(Button, Cell):
 
 class MapWidget(GridLayout):
 
-    #Map size
-    map_size = NumericProperty(50)
-
-
-
     def __init__(self, **kwargs):
         """Constructor.
 
@@ -134,9 +135,9 @@ class MapWidget(GridLayout):
         Return:
             NONE
         """
-        super(MapWidget, self).__init__(rows=self.map_size, cols=self.map_size, pos_hint={'top': 1 - actionbar_height / window_y})
-        for row in range(self.map_size):
-            for col in range(self.map_size):
+        super(MapWidget, self).__init__(rows=map_size, cols=map_size, pos_hint={'top': 1 - actionbar_height / window_y})
+        for row in range(map_size):
+            for col in range(map_size):
                 self.add_widget(CellWidget(row, col))
 
 
@@ -275,13 +276,16 @@ class MappingUtilApp(App):
         #Root widget
         root = FloatLayout()
 
-        #The grid/map
+        #Child widgets
         map = MapWidget()
-        root.add_widget(map)
         self.map_gui = map
+        actionbar = self.create_actionbar()
+        self.actionbar = actionbar
+        popup = self.create_serialization_success_popup()
+        self.popup = popup
 
-        #Action bar
-        root.add_widget(self.create_actionbar())
+        root.add_widget(map)
+        root.add_widget(actionbar)
 
         return root
 
@@ -313,7 +317,7 @@ class MappingUtilApp(App):
 
         #Actionbar buttons
         open = ActionButton(text='Open')
-        save = ActionButton(text='Save')
+        save = ActionButton(text='Save', on_press=self.serialize_map)
         clear = ActionButton(text='Clear', on_press=self.map_gui.clear_map)
 
         #Add widgets to actionbar
@@ -328,6 +332,21 @@ class MappingUtilApp(App):
 
 
 
+    def create_serialization_success_popup(self):
+        """Creates the successful serialization popup.
+
+        Args:
+            NONE
+
+        Return:
+            NONE
+        """
+        popup = Popup(size_hint=(None, None), size=(120, 60), title='Saved', title_align='center', auto_dismiss=True, separator_height=0)
+
+        return popup
+
+
+
     def disable_window_resize(self, instance, x, y):
         """Disables window resizing.
 
@@ -338,6 +357,30 @@ class MappingUtilApp(App):
         """
         if x != window_x or y != window_y:
             Window.size = (window_x, window_y)
+
+
+
+    def serialize_map(self, instance):
+        """Save the map/grid.
+
+        Args:
+            instance - N/A
+
+        Return:
+            NONE
+        """
+        #Serialize map (serializing widgets is not possible)
+        serial_map = Map(map_size, map_size)
+        for child in self.map_gui.children:
+            serial_cell = Cell(child.row, child.col)
+            serial_cell.cell_type = child.cell_type
+            serial_map.matrix[child.row][child.col] = serial_cell
+
+        with open('serialized_map.config', 'wb') as serialized_map_config:
+            pickle.dump(serial_map, serialized_map_config)
+
+        #Serialization success popup
+        self.popup.open()
 
 
 
