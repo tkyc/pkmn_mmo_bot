@@ -1,13 +1,16 @@
+import os
 import pickle
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scatterlayout import ScatterLayout
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.actionbar import ActionBar, ActionItem, ActionButton, ActionGroup, ActionView, ActionPrevious, ActionDropDown
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
+from kivy.uix.filechooser import FileChooserListView
 from kivy.config import Config
 from kivy.core.window import Window
 from kivy.properties import *
@@ -69,14 +72,13 @@ class CellWidget(Button, Cell):
         super(CellWidget, self).__init__(size_hint=(None, None), size=(self.cell_size, self.cell_size), row=row, col=col)
         self.bind(on_press=self.set_cell)
 
-        #Default cell type selection
-        self.enabled_colour = CellType.PATH
+        #Default cell type/colour selection
+        self.enable_colour_of_type = CellType.PATH
 
 
 
-    def set_cell(self, instance):
-        """Callback for enabling the cell colour and sets the cell type if the cell is clicked.
-           Clicking an already set cell will reset that cell.
+    def set_cell(self, instance=None):
+        """Sets the cell colour and type depending on the enabled_colour_of_type instance variable.
 
         Args:
             instance - N/A
@@ -90,22 +92,22 @@ class CellWidget(Button, Cell):
             self.cell_type = None
 
         #Grass cell
-        elif self.enabled_colour == CellType.GRASS:
+        elif self.enable_colour_of_type == CellType.GRASS:
             self.background_color = self.grass
             self.cell_type = CellType.GRASS
 
         #Prop cell
-        elif self.enabled_colour == CellType.PROP:
+        elif self.enable_colour_of_type == CellType.PROP:
             self.background_color = self.prop
             self.cell_type = CellType.PROP
 
         #Target cell
-        elif self.enabled_colour == CellType.TARGET:
+        elif self.enable_colour_of_type == CellType.TARGET:
             self.background_color = self.target
             self.cell_type = CellType.TARGET
 
         #Path cell
-        elif self.enabled_colour == CellType.PATH:
+        elif self.enable_colour_of_type == CellType.PATH:
             self.background_color = self.path
             self.cell_type = CellType.PATH
 
@@ -142,21 +144,21 @@ class MapWidget(GridLayout):
 
 
 
-    def enable_cell_colour(self, colour):
+    def enable_cell_colour(self, cell_type):
         """Enables the selected colour for marking on the map/grid.
 
         Args:
-            colour - A CellType. It is one of the following: CellType.GRASS, CellType.PROP, CellType.TARGET, CellType.PATH.
+            cell_type - A CellType. It is one of the following: CellType.GRASS, CellType.PROP, CellType.TARGET, CellType.PATH.
 
         Return:
             NONE
         """
         for child in self.children:
-            child.enabled_colour = colour
+            child.enable_colour_of_type = cell_type
 
 
 
-    def clear_map(self, instance):
+    def clear_map(self, instance=None):
         """Clears the map and resets cell type.
 
         Args:
@@ -281,8 +283,10 @@ class MappingUtilApp(App):
         self.map_gui = map
         actionbar = self.create_actionbar()
         self.actionbar = actionbar
-        popup = self.create_serialization_success_popup()
-        self.popup = popup
+        serialization_success_popup = self.create_serialization_success_popup()
+        self.serialization_success_popup = serialization_success_popup
+        file_chooser_popup = self.create_file_chooser()
+        self.file_chooser_popup = file_chooser_popup
 
         root.add_widget(map)
         root.add_widget(actionbar)
@@ -316,7 +320,7 @@ class MappingUtilApp(App):
         spinner.add_widget(path)
 
         #Actionbar buttons
-        open = ActionButton(text='Open')
+        open = ActionButton(text='Open', on_press=lambda instance : self.file_chooser_popup.open())
         save = ActionButton(text='Save', on_press=self.serialize_map)
         clear = ActionButton(text='Clear', on_press=self.map_gui.clear_map)
 
@@ -347,7 +351,35 @@ class MappingUtilApp(App):
 
 
 
-    def disable_window_resize(self, instance, x, y):
+    def create_file_chooser(self):
+        """Creates the file chooser popup.
+
+        Args:
+            NONE
+
+        Return:
+            NONE
+        """
+        #Widgets
+        file_chooser_popup = Popup(size_hint=(0.7, 0.8), auto_dismiss=True, separator_height=0, title='')
+        file_chooser = FileChooserListView()
+        load_button = Button(text='Load', on_press=lambda instance : self.open_serialized_map(file_chooser.path, file_chooser.selection))
+        cancel_button = Button(text='Cancel', on_press=file_chooser_popup.dismiss)
+
+        #Organizing layout
+        box_layout = BoxLayout(orientation='vertical')
+        grid_layout = GridLayout(rows=1, cols=2, size_hint=(1, 0.07), padding=(10, 10, 10, 5), spacing=(10, 0))
+        box_layout.add_widget(file_chooser)
+        grid_layout.add_widget(load_button)
+        grid_layout.add_widget(cancel_button)
+        box_layout.add_widget(grid_layout)
+        file_chooser_popup.add_widget(box_layout)
+
+        return file_chooser_popup
+
+
+
+    def disable_window_resize(self, x, y, instance=None):
         """Disables window resizing.
 
         Args:
@@ -360,7 +392,7 @@ class MappingUtilApp(App):
 
 
 
-    def serialize_map(self, instance):
+    def serialize_map(self, instance=None):
         """Save the map/grid.
 
         Args:
@@ -380,7 +412,33 @@ class MappingUtilApp(App):
             pickle.dump(serial_map, serialized_map_config)
 
         #Serialization success popup
-        self.popup.open()
+        self.serialization_success_popup.open()
+
+
+
+    def open_serialized_map(self, path, filename):
+        """Load the serialized map into the app.
+
+        Args:
+            path - The path to the directory.
+            filename - The name of serialized map file.
+
+        Return:
+            NONE
+        """
+        try:
+            path = os.path.join(path, filename[0])
+            with open(path, 'rb') as serialized_map:
+                map = pickle.load(serialized_map)
+                for child in self.map_gui.children:
+                    child.enable_colour_of_type = map.matrix[child.row][child.col].cell_type
+                    child.set_cell()
+                    child.enable_colour_of_type = CellType.PATH
+        except:
+            error_popup = Popup(size_hint=(None, None), size=(250, 60), title='Error:  Not a serialized map file', title_align='center', auto_dismiss=True, separator_height=0)
+            error_popup.open()
+
+        self.file_chooser_popup.dismiss()
 
 
 
