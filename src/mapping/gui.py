@@ -71,14 +71,13 @@ class CellWidget(Button, Cell):
         """
         super(CellWidget, self).__init__(size_hint=(None, None), size=(self.cell_size, self.cell_size), row=row, col=col)
         self.bind(on_press=self.set_cell)
-
         #Default cell type/colour selection
         self.enable_colour_of_type = CellType.PATH
 
 
 
     def set_cell(self, instance=None):
-        """Sets the cell colour and type depending on the enabled_colour_of_type instance variable.
+        """Callback that sets the cell colour and type depending on the enabled_colour_of_type instance variable.
 
         Args:
             instance - N/A
@@ -86,13 +85,8 @@ class CellWidget(Button, Cell):
         Return:
             NONE
         """
-        #Resets cell
-        if self.cell_type != None:
-            self.background_color = (1, 1, 1, 1)
-            self.cell_type = None
-
         #Grass cell
-        elif self.enable_colour_of_type == CellType.GRASS:
+        if self.enable_colour_of_type == CellType.GRASS:
             self.background_color = self.grass
             self.cell_type = CellType.GRASS
 
@@ -110,6 +104,29 @@ class CellWidget(Button, Cell):
         elif self.enable_colour_of_type == CellType.PATH:
             self.background_color = self.path
             self.cell_type = CellType.PATH
+
+        #Null cell
+        elif self.enable_colour_of_type == None:
+            self.background_color = (1, 1, 1, 1)
+
+
+
+    def on_touch_move(self, touch):
+        """Assigns/unassigns cell type by mouse drag.
+
+        Args:
+            touch - The touch event.
+
+        Return:
+            NONE
+        """
+        if self.collide_point(*touch.pos):
+            if touch.button == 'right':
+                self.background_color = (1, 1, 1, 1)
+                self.cell_type = None
+            if touch.button == 'left':
+                self.set_cell()
+            return True
 
 
 

@@ -8,4 +8,4 @@ with open('serialized_map.config', 'rb') as serialized_map:
     for row in range(50):
         for col in range(50):
             # print('(' + str(map.matrix[row][col].row) + ', ' + str(map.matrix[row][col].col) + ')')
-            print(map.matrix[row][col].cell_type)
+            print(str(map.matrix[row][col].cell_type) + ': ' + '(' + str(map.matrix[row][col].row) + ', ' + str(map.matrix[row][col].col) + ')')
