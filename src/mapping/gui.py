@@ -70,7 +70,7 @@ class CellWidget(Button, Cell):
             NONE
         """
         super(CellWidget, self).__init__(size_hint=(None, None), size=(self.cell_size, self.cell_size), row=row, col=col)
-        self.bind(on_press=self.set_cell)
+        
         #Default cell type/colour selection
         self.enable_colour_of_type = CellType.PATH
 
@@ -111,12 +111,12 @@ class CellWidget(Button, Cell):
 
 
 
-    def on_touch_move(self, touch):
-        """Assigns/unassigns cell type by mouse drag.
+    def on_touch(self, touch):
+        """Handles mouse events.
 
         Args:
-            touch - The touch event.
-
+            touch - The mouse event.
+        
         Return:
             NONE
         """
@@ -127,6 +127,32 @@ class CellWidget(Button, Cell):
             if touch.button == 'left':
                 self.set_cell()
             return True
+
+
+
+    def on_touch_down(self, touch):
+        """Assigns/unassigns cell type by mouse click.
+
+        Args:
+            touch - The touch event.
+
+        Return:
+            NONE
+        """
+        self.on_touch(touch)
+
+
+
+    def on_touch_move(self, touch):
+        """Assigns/unassigns cell type by mouse drag.
+
+        Args:
+            touch - The touch event.
+
+        Return:
+            NONE
+        """
+        self.on_touch(touch)
 
 
 
