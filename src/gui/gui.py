@@ -1,5 +1,7 @@
 import os
 import pickle
+import pyautogui
+import math
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.gridlayout import GridLayout
@@ -35,12 +37,12 @@ window_y = 900
 #Map size (50 x 50)
 map_size = 50
 
+#Cell size
+cell_size = 17
+
 
 
 class CellWidget(Button, Cell):
-
-    #Cell size
-    cell_size = NumericProperty(17)
 
     #Grass cell colour
     grass = ListProperty((124 / 255, 252 / 255, 0, 1))
@@ -66,7 +68,7 @@ class CellWidget(Button, Cell):
         Return:
             NONE
         """
-        super(CellWidget, self).__init__(size_hint=(None, None), size=(self.cell_size, self.cell_size), row=row, col=col)
+        super(CellWidget, self).__init__(size_hint=(None, None), size=(cell_size, cell_size), row=row, col=col)
         
         #Default cell type/colour selection
         self.enable_colour_of_type = CellType.PATH
@@ -213,6 +215,55 @@ class MapWidget(GridLayout):
 
 
 
+class ActionBarWidget(ActionBar):
+
+    def __init__(self, app, **kwargs):
+        """Constructor. Initialize the actionbar last after all other widgets.
+           This widget depends on some functions from other widgets.
+
+        Args:
+            NONE
+
+        Returns:
+            NONE
+        """
+        #Actionbar initialization
+        super(ActionBarWidget, self).__init__(pos_hint={'top': 1})
+        action_view = ActionView()
+
+        #Spinner initialization
+        spinner = ActionGroup(mode='spinner', text='Select')
+        grass = ActionButton(text='Grass cell', on_press=lambda instance : app.map_gui.enable_cell_colour(CellType.GRASS))
+        prop = ActionButton(text='Prop cell', on_press=lambda instance : app.map_gui.enable_cell_colour(CellType.PROP))
+        target = ActionButton(text='Target cell', on_press=lambda instance : app.map_gui.enable_cell_colour(CellType.TARGET))
+        path = ActionButton(text='Path cell', on_press=lambda instance : app.map_gui.enable_cell_colour(CellType.PATH))
+        spinner.add_widget(grass)
+        spinner.add_widget(prop)
+        spinner.add_widget(target)
+        spinner.add_widget(path)
+
+        #Actionbar buttons
+        open = ActionButton(text='Open', on_press=lambda instance : app.file_chooser_popup.open())
+        save = ActionButton(text='Save', on_press=app.serialize_map)
+        clear = ActionButton(text='Clear', on_press=app.map_gui.clear_map)
+
+        #Add widgets to actionbar
+        action_view.add_widget(open)
+        action_view.add_widget(save)
+        action_view.add_widget(clear)
+        action_view.add_widget(spinner)
+        action_view.add_widget(ActionPrevious(with_previous=False, app_icon='icon.png', app_icon_height=actionbar_height / 2, app_icon_width=actionbar_height / 2))
+        self.add_widget(action_view)
+
+
+
+    def on_touch_move(self, touch):
+        if self.collide_point(*touch.pos):
+            print("bar")
+            return True
+
+
+
 class ZoomWidget(ScatterLayout, Widget):
 
     def __init__(self, **kwargs):
@@ -314,6 +365,8 @@ class MappingUtilApp(App):
         Window.size = (window_x, window_y)
         Window._set_window_pos(Window._get_window_pos()[0], Window._get_window_pos()[1] - 150)
         Window.bind(on_resize=self.disable_window_resize)
+        Window.borderless = True
+        self.icon = 'icon.png'
 
         #Root widget
         root = FloatLayout()
@@ -321,58 +374,20 @@ class MappingUtilApp(App):
         #Child widgets
         map = MapWidget()
         self.map_gui = map
-        actionbar = self.create_actionbar()
-        self.actionbar = actionbar
+
         serialization_success_popup = self.create_serialization_success_popup()
         self.serialization_success_popup = serialization_success_popup
+
         file_chooser_popup = self.create_file_chooser()
         self.file_chooser_popup = file_chooser_popup
+        
+        actionbar = ActionBarWidget(self)
+        self.actionbar = actionbar
 
         root.add_widget(map)
         root.add_widget(actionbar)
 
         return root
-
-
-
-    def create_actionbar(self):
-        """Creates the actionbar.
-
-        Args:
-            NONE
-
-        Return:
-            NONE
-        """
-        #Actionbar initialization
-        actionbar = ActionBar(pos_hint={'top': 1})
-        action_view = ActionView()
-
-        #Spinner initialization
-        spinner = ActionGroup(mode='spinner', text='Select')
-        grass = ActionButton(text='Grass cell', on_press=lambda instance : self.map_gui.enable_cell_colour(CellType.GRASS))
-        prop = ActionButton(text='Prop cell', on_press=lambda instance : self.map_gui.enable_cell_colour(CellType.PROP))
-        target = ActionButton(text='Target cell', on_press=lambda instance : self.map_gui.enable_cell_colour(CellType.TARGET))
-        path = ActionButton(text='Path cell', on_press=lambda instance : self.map_gui.enable_cell_colour(CellType.PATH))
-        spinner.add_widget(grass)
-        spinner.add_widget(prop)
-        spinner.add_widget(target)
-        spinner.add_widget(path)
-
-        #Actionbar buttons
-        open = ActionButton(text='Open', on_press=lambda instance : self.file_chooser_popup.open())
-        save = ActionButton(text='Save', on_press=self.serialize_map)
-        clear = ActionButton(text='Clear', on_press=self.map_gui.clear_map)
-
-        #Add widgets to actionbar
-        action_view.add_widget(open)
-        action_view.add_widget(save)
-        action_view.add_widget(clear)
-        action_view.add_widget(spinner)
-        action_view.add_widget(ActionPrevious(with_previous=False))
-        actionbar.add_widget(action_view)
-
-        return actionbar
 
 
 
@@ -419,19 +434,6 @@ class MappingUtilApp(App):
 
 
 
-    def disable_window_resize(self, x, y, instance=None):
-        """Disables window resizing.
-
-        Args:
-            instance - N/A
-            x - The window's current width.
-            y - The window's current height.
-        """
-        if x != window_x or y != window_y:
-            Window.size = (window_x, window_y)
-
-
-
     def serialize_map(self, instance=None):
         """Save the map/grid.
 
@@ -473,12 +475,27 @@ class MappingUtilApp(App):
                 for child in self.map_gui.children:
                     child.enable_colour_of_type = map.matrix[child.row][child.col].cell_type
                     child.set_cell()
+
+                    #Defaults selected cell assignment back to CellType.PATH
                     child.enable_colour_of_type = CellType.PATH
         except:
             error_popup = Popup(size_hint=(None, None), size=(250, 60), title='Error:  Not a serialized map file', title_align='center', auto_dismiss=True, separator_height=0)
             error_popup.open()
 
         self.file_chooser_popup.dismiss()
+
+
+
+    def disable_window_resize(self, x, y, instance=None):
+        """Disables window resizing.
+
+        Args:
+            instance - N/A
+            x - The window's current width.
+            y - The window's current height.
+        """
+        if x != window_x or y != window_y:
+            Window.size = (window_x, window_y)
 
 
 
