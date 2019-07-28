@@ -11,6 +11,7 @@ from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.filechooser import FileChooserListView
+from kivy.uix.spinner import Spinner
 from kivy.config import Config
 from kivy.core.window import Window
 from kivy.properties import *
@@ -214,6 +215,9 @@ class MapWidget(GridLayout):
 
 
 class ActionBarWidget(ActionBar):
+    """The ActionBarWidget is used to move the program window.
+    """
+
 
     def __init__(self, app, **kwargs):
         """Constructor. Initialize the actionbar last after all other widgets.
@@ -245,11 +249,13 @@ class ActionBarWidget(ActionBar):
         spinner.add_widget(path)
 
         #Actionbar buttons
+        Run = ActionButton(text='Run', on_press=lambda instance : app.run_menu_popup.open())
         open = ActionButton(text='Open', on_press=lambda instance : app.file_chooser_popup.open())
         save = ActionButton(text='Save', on_press=app.serialize_map)
         clear = ActionButton(text='Clear', on_press=app.map_gui.clear_map)
 
         #Add widgets to actionbar
+        action_view.add_widget(Run)
         action_view.add_widget(open)
         action_view.add_widget(save)
         action_view.add_widget(clear)
@@ -421,6 +427,9 @@ class MappingUtilApp(App):
         file_chooser_popup = self.create_file_chooser()
         self.file_chooser_popup = file_chooser_popup
 
+        run_menu_popup = self.create_run_menu()
+        self.run_menu_popup = run_menu_popup
+
         actionbar = ActionBarWidget(self)
         self.actionbar = actionbar
 
@@ -431,18 +440,35 @@ class MappingUtilApp(App):
 
 
 
-    def create_serialization_success_popup(self):
-        """Creates the successful serialization popup.
+    def create_run_menu(self):
+        """Creates the run menu popup.
 
         Args:
             NONE
 
-        Return:
+        Returns:
             NONE
         """
-        popup = Popup(size_hint=(None, None), size=(120, 60), title='Saved', title_align='center', auto_dismiss=True, separator_height=0)
+        #Initializing widgets
+        run_menu_popup = Popup(size_hint=(0.7, 0.4), auto_dismiss=True, separator_height=0, title='')
 
-        return popup
+        scripts = os.listdir('../battle_scripts/')
+        del scripts[-1]
+        spinner = Spinner(text='Select', values=scripts, size_hint=(1, 0.008), pos_hint={'top': 1})
+
+        run_button = Button(text='Run', on_press=lambda instance : print(spinner.text))
+        cancel_button = Button(text='Cancel', on_press=run_menu_popup.dismiss)
+
+        #Organizing layout
+        box_layout = BoxLayout(orientation='vertical')
+        grid_layout = GridLayout(rows=1, cols=2, size_hint=(1, 0.07), padding=(10, 250, 10, 5), spacing=(10, 0))
+        box_layout.add_widget(spinner)
+        grid_layout.add_widget(run_button)
+        grid_layout.add_widget(cancel_button)
+        box_layout.add_widget(grid_layout)
+        run_menu_popup.add_widget(box_layout)
+        
+        return run_menu_popup
 
 
 
@@ -455,7 +481,7 @@ class MappingUtilApp(App):
         Return:
             NONE
         """
-        #Widgets
+        #Initializing widgets
         file_chooser_popup = Popup(size_hint=(0.7, 0.8), auto_dismiss=True, separator_height=0, title='')
         file_chooser = FileChooserListView()
         load_button = Button(text='Load', on_press=lambda instance : self.open_serialized_map(file_chooser.path, file_chooser.selection))
@@ -523,6 +549,21 @@ class MappingUtilApp(App):
             error_popup.open()
 
         self.file_chooser_popup.dismiss()
+
+
+
+    def create_serialization_success_popup(self):
+        """Creates the successful serialization popup.
+
+        Args:
+            NONE
+
+        Return:
+            NONE
+        """
+        popup = Popup(size_hint=(None, None), size=(120, 60), title='Saved', title_align='center', auto_dismiss=True, separator_height=0)
+
+        return popup
 
 
 
