@@ -1,7 +1,5 @@
 import os
 import pickle
-import pyautogui
-import math
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.gridlayout import GridLayout
@@ -222,7 +220,7 @@ class ActionBarWidget(ActionBar):
            This widget depends on some functions from other widgets.
 
         Args:
-            NONE
+            app - The application.
 
         Returns:
             NONE
@@ -230,6 +228,10 @@ class ActionBarWidget(ActionBar):
         #Actionbar initialization
         super(ActionBarWidget, self).__init__(pos_hint={'top': 1})
         action_view = ActionView()
+        action_prev = ActionPrevious(with_previous=False, app_icon='icon.png', app_icon_height=actionbar_height / 2, app_icon_width=actionbar_height / 2)
+        #Used to calculate direction vector to move window
+        self.mouse_x = None
+        self.mouse_y = None
 
         #Spinner initialization
         spinner = ActionGroup(mode='spinner', text='Select')
@@ -252,15 +254,53 @@ class ActionBarWidget(ActionBar):
         action_view.add_widget(save)
         action_view.add_widget(clear)
         action_view.add_widget(spinner)
-        action_view.add_widget(ActionPrevious(with_previous=False, app_icon='icon.png', app_icon_height=actionbar_height / 2, app_icon_width=actionbar_height / 2))
+        action_view.add_widget(action_prev)
         self.add_widget(action_view)
 
 
 
-    def on_touch_move(self, touch):
+    def on_touch_down(self, touch):
+        """Get the current mouse position on right click.
+
+        Args:
+            touch - The mouse event.
+
+        Return:
+            boolean - True if collision with action bar, otherwise propagate mouse event.
+        """
         if self.collide_point(*touch.pos):
-            print("bar")
-            return True
+            if touch.button == 'right':
+                self.mouse_x = touch.pos[0]
+                self.mouse_y = touch.pos[1]
+                return True
+        return super(ActionBarWidget, self).on_touch_down(touch)
+
+
+
+    def on_touch_move(self, touch):
+        """Get the mouse position as the mouse is dragged.
+
+        Args:
+            touch - The mouse event.
+
+        Return:
+            boolean - True if collision with action bar, otherwise propagate mouse event.
+        """
+        if self.collide_point(*touch.pos):
+            if touch.button == 'right':
+                # direction = math.atan2(touch.pos[1] - self.mouse_y, touch.pos[0] - self.mouse_x)
+                # x_direction = round(math.cos(direction))
+                # y_direction = round(math.sin(direction))
+                # Window.top = Window.top - (y_direction * 2)
+                # Window.left = Window.left + (x_direction * 2)
+                # self.mouse_x = touch.pos[0]
+                # self.mouse_y = touch.pos[1]
+                x_direction = touch.pos[0] - self.mouse_x
+                y_direction = touch.pos[1] - self.mouse_y
+                Window.top = Window.top - y_direction
+                Window.left = Window.left + x_direction
+                return True
+        return super(ActionBarWidget, self).on_touch_down(touch)
 
 
 
@@ -380,7 +420,7 @@ class MappingUtilApp(App):
 
         file_chooser_popup = self.create_file_chooser()
         self.file_chooser_popup = file_chooser_popup
-        
+
         actionbar = ActionBarWidget(self)
         self.actionbar = actionbar
 
