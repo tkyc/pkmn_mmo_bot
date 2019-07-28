@@ -75,12 +75,12 @@ class CellWidget(Button, Cell):
 
 
     def set_cell(self, instance=None):
-        """Callback that sets the cell colour and type depending on the enabled_colour_of_type instance variable.
+        """Sets the cell colour and type depending on the enabled_colour_of_type instance variable.
 
         Args:
             instance - N/A
 
-        Return:
+        Returns:
             NONE
         """
         #Grass cell
@@ -134,7 +134,7 @@ class CellWidget(Button, Cell):
         Args:
             touch - The touch event.
 
-        Return:
+        Returns:
             NONE
         """
         self.on_touch(touch)
@@ -147,7 +147,7 @@ class CellWidget(Button, Cell):
         Args:
             touch - The touch event.
 
-        Return:
+        Returns:
             NONE
         """
         self.on_touch(touch)
@@ -160,7 +160,7 @@ class CellWidget(Button, Cell):
         Args:
             NONE
 
-        Return:
+        Returns:
             NONE
         """
         print('(' + str(self.row) + ', ' + str(self.col) + ')')
@@ -183,6 +183,9 @@ class MapWidget(GridLayout):
             for col in range(map_size):
                 self.add_widget(CellWidget(row, col))
 
+        #Saved/opened map from file
+        self.map = None
+
 
 
     def enable_cell_colour(self, cell_type):
@@ -191,7 +194,7 @@ class MapWidget(GridLayout):
         Args:
             cell_type - A CellType. It is one of the following: CellType.GRASS, CellType.PROP, CellType.TARGET, CellType.PATH.
 
-        Return:
+        Returns:
             NONE
         """
         for child in self.children:
@@ -205,9 +208,10 @@ class MapWidget(GridLayout):
         Args:
             NONE
 
-        Return:
+        Returns:
             NONE
         """
+        self.map = None
         for child in self.children:
             child.background_color = (1, 1, 1, 1)
             child.cell_type = None
@@ -271,7 +275,7 @@ class ActionBarWidget(ActionBar):
         Args:
             touch - The mouse event.
 
-        Return:
+        Returns:
             boolean - True if collision with action bar, otherwise propagate mouse event.
         """
         if self.collide_point(*touch.pos):
@@ -289,7 +293,7 @@ class ActionBarWidget(ActionBar):
         Args:
             touch - The mouse event.
 
-        Return:
+        Returns:
             boolean - True if collision with action bar, otherwise propagate mouse event.
         """
         if self.collide_point(*touch.pos):
@@ -318,7 +322,7 @@ class ZoomWidget(ScatterLayout, Widget):
         Args:
             NONE
 
-        Return:
+        Returns:
             NONE
         """
         super(ZoomWidget, self).__init__()
@@ -333,7 +337,7 @@ class ZoomWidget(ScatterLayout, Widget):
         Args:
             NONE
 
-        Return:
+        Returns:
             NONE
         """
         self.keyboard.unbind(on_key_down=self.on_keyboard_down)
@@ -350,7 +354,7 @@ class ZoomWidget(ScatterLayout, Widget):
             text - N/A
             modifiers - N/A
         
-        Return:
+        Returns:
             NONE
         """
         if keycode[1] == 'left':
@@ -366,7 +370,7 @@ class ZoomWidget(ScatterLayout, Widget):
     #     Args:
     #         NONE
         
-    #     Return:
+    #     Returns:
     #         NONE
     #     """
     #     if touch.button == 'scrollup':
@@ -384,7 +388,7 @@ class ZoomWidget(ScatterLayout, Widget):
     #     Args:
     #         zoom_in - A boolean that determines whether to zoom in or zoom out.
 
-    #     Return:
+    #     Returns:
     #         NONE
     #     """
     #     if zoom_in:
@@ -404,7 +408,7 @@ class MappingUtilApp(App):
         Args:
             NONE
 
-        Return
+        Returns:
             NONE
         """
         #Initializing window
@@ -452,11 +456,11 @@ class MappingUtilApp(App):
         #Initializing widgets
         run_menu_popup = Popup(size_hint=(0.7, 0.4), auto_dismiss=True, separator_height=0, title='')
 
-        scripts = os.listdir('../battle_scripts/')
+        scripts = os.listdir('../scripts/')
         del scripts[-1]
         spinner = Spinner(text='Select', values=scripts, size_hint=(1, 0.008), pos_hint={'top': 1})
 
-        run_button = Button(text='Run', on_press=lambda instance : print(spinner.text))
+        run_button = Button(text='Run', on_press=lambda instance : self.run_script(spinner.text))
         cancel_button = Button(text='Cancel', on_press=run_menu_popup.dismiss)
 
         #Organizing layout
@@ -472,13 +476,28 @@ class MappingUtilApp(App):
 
 
 
+    def run_script(self, script):
+        """Run the selected script.
+
+        Args:
+            script - The name of the script.
+
+        Returns:
+            NONE
+        """
+        path = '../scripts/' + script
+        os.system('python ' + path)
+        self.run_menu_popup.dismiss()
+
+
+
     def create_file_chooser(self):
         """Creates the file chooser popup.
 
         Args:
             NONE
 
-        Return:
+        Returns:
             NONE
         """
         #Initializing widgets
@@ -506,11 +525,12 @@ class MappingUtilApp(App):
         Args:
             instance - N/A
 
-        Return:
+        Returns:
             NONE
         """
         #Serialize map (serializing widgets is not possible)
         serial_map = Map(map_size, map_size)
+        self.map_gui.map = serial_map
         for child in self.map_gui.children:
             serial_cell = Cell(child.row, child.col)
             serial_cell.cell_type = child.cell_type
@@ -531,13 +551,14 @@ class MappingUtilApp(App):
             path - The path to the directory.
             filename - The name of serialized map file.
 
-        Return:
+        Returns:
             NONE
         """
         try:
             path = os.path.join(path, filename[0])
             with open(path, 'rb') as serialized_map:
                 map = pickle.load(serialized_map)
+                self.map_gui.map = map
                 for child in self.map_gui.children:
                     child.enable_colour_of_type = map.matrix[child.row][child.col].cell_type
                     child.set_cell()
@@ -558,7 +579,7 @@ class MappingUtilApp(App):
         Args:
             NONE
 
-        Return:
+        Returns:
             NONE
         """
         popup = Popup(size_hint=(None, None), size=(120, 60), title='Saved', title_align='center', auto_dismiss=True, separator_height=0)
@@ -574,6 +595,9 @@ class MappingUtilApp(App):
             instance - N/A
             x - The window's current width.
             y - The window's current height.
+
+        Returns:
+            NONE
         """
         if x != window_x or y != window_y:
             Window.size = (window_x, window_y)
