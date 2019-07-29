@@ -135,7 +135,7 @@ def is_pokemon_fainted():
     Returns:
         NONE
     """
-    is_fainted = pyautogui.locateOnScreen('../../assets/fainted.PNG', confidence=0.9)
+    is_fainted = pyautogui.locateOnScreen('../../assets/fainted.PNG', confidence=0.8)
 
     if is_fainted == None:
         return False
