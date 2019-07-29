@@ -18,6 +18,7 @@ from kivy.properties import *
 from mapping.Cell import Cell
 from mapping.CellType import CellType
 from mapping.Map import Map
+from src.scripts.wild_training import execute_training
 
 ###########################
 ##        Globals        ##
@@ -460,8 +461,8 @@ class MappingUtilApp(App):
         del scripts[-1]
         spinner = Spinner(text='Select', values=scripts, size_hint=(1, 0.008), pos_hint={'top': 1})
 
-        run_button = Button(text='Run', on_press=lambda instance : self.run_script(spinner.text))
-        cancel_button = Button(text='Cancel', on_press=run_menu_popup.dismiss)
+        run_button = Button(text='Run script', on_press=lambda instance : self.run_script(spinner.text))
+        cancel_button = Button(text='Stop script', on_press=run_menu_popup.dismiss)
 
         #Organizing layout
         box_layout = BoxLayout(orientation='vertical')
@@ -485,9 +486,8 @@ class MappingUtilApp(App):
         Returns:
             NONE
         """
-        path = '../scripts/' + script
-        os.system('python ' + path)
         self.run_menu_popup.dismiss()
+        execute_training(self.map_gui.map)
 
 
 

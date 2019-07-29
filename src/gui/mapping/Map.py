@@ -1,5 +1,5 @@
-from mapping.Cell import Cell
-from mapping.CellType import CellType
+from src.gui.mapping.Cell import Cell
+from src.gui.mapping.CellType import CellType
 
 class Map:
 

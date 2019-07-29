@@ -1,4 +1,4 @@
-from mapping.CellType import CellType
+from src.gui.mapping.CellType import CellType
 
 class Cell:
 
