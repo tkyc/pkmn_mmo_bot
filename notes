@@ -1,0 +1,179 @@
+static void findOpCodeBytesAVX(HWND hwnd)
+{
+    // Get process id
+    DWORD pid;
+    GetWindowThreadProcessId(hwnd, &pid);
+
+    // Get process handle
+    HANDLE phandle = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
+
+    uint8_t targetAobSize = 15;
+    //                                   233,    2,   32,   63,   13,   25,    0,    0,    0,    0,    0,    2,    0,    0,    0
+    uint8_t targetAob[targetAobSize] = {0xe9, 0x02, 0x20, 0x3f, 0x0d, 0x19, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00};
+    DWORD64 maxAddress = 0xFFFFFFFF;
+    DWORD64 baseAddress = 0xF0000000;
+
+    uint32_t size = maxAddress - baseAddress;
+    uint8_t* memoryRegion = new uint8_t[size];
+    ReadProcessMemory(phandle, (LPCVOID) baseAddress, memoryRegion, size, NULL);
+
+    // Debug
+    //DWORD64 baseAddress = 0xF22D0CB1;
+    //DWORD64 max = baseAddress + 60;
+
+    auto r1 = _mm256_load_si256((__m256i*) targetAob);
+    //for (;baseAddress < maxAddress; baseAddress++)
+    for (int i = 0; i < size; i++)
+    {
+        //std::cout << "@ address: " << baseAddress << std::endl;
+        //uint8_t bytes[targetAobSize];
+        //ReadProcessMemory(phandle, (LPCVOID) baseAddress, bytes, targetAobSize, NULL);
+
+        auto r0 = _mm256_load_si256((__m256i*) (memoryRegion + i));
+        auto r3 = _mm256_cmpeq_epi8(r0, r1);
+
+        uint8_t* res = (uint8_t*) &r3;
+        uint8_t m1 = 0;
+
+        for (int j = 0; j < targetAobSize; j++)
+        {
+            if (res[j] != 255)
+            {
+                break;
+            } 
+            else
+            {
+                if (j == 14)
+                {
+                    m1 = 255;
+                    break;
+                }
+            }
+        }
+
+        //for (int i = 0; i < 15; i++)
+        //{
+        //    std::cout << (int) res[i] << std::endl;
+        //}
+
+        //uint8_t m1 = res[0] & res [1] & res [2] & res [3] & res [4] & res [5] & res [6] & res [7] & res [8] & res [9] & res [10] & res [11] & res [12] & res [13] & res [14];
+        //uint8_t m2 = res[15] & res [16] & res [17] & res [18] & res [19] & res [20] & res [21] & res [22] & res [23] & res [24] & res [25] & res [26] & res [27] & res [28] & res [29];
+        //std::cout << "m1: " << (int) m1 << std::endl;
+        //std::cout << "m2: " << (int) m2 << std::endl;
+
+        if (((int) m1) == 255)
+        {
+            std::cout << "M1 MATCH" << std::endl;
+            std::cout << baseAddress + i << std::endl;
+
+            //uint8_t byte;
+            //ReadProcessMemory(phandle, (LPCVOID) baseAddress + i, &byte, 1, NULL);
+            //std::cout << "INITIAL BYTE: " << (int) byte << std::endl;
+            return;
+        } else {
+            continue;
+        }
+    }
+
+    delete[] memoryRegion;
+
+    std::cout << "NOT FOUND" << std::endl;
+
+    return;
+
+} // End of find op code bytes AVX function
+
+static DWORD64 getBaseAddress(HWND hwnd)
+{
+    // Get process id
+    DWORD pid;
+    GetWindowThreadProcessId(hwnd, &pid);
+
+    // Get process handle
+    HANDLE phandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, pid);
+
+    // Identify name of module
+    //char lpImageFilename[BUFFER_SIZE];
+    //DWORD len = GetProcessImageFileNameA(phandle, lpImageFilename, BUFFER_SIZE); //MinGW needs -lpsapi flag for Psapi
+    //std::cout << "Module is located at: " << lpImageFilename << std::endl;
+
+    // Enumerate all modules in process
+    HMODULE hMods[BUFFER_SIZE];
+
+    // Enumerate first module in process
+    //HMODULE hMods;
+    DWORD cbNeeded;
+
+
+    //if (EnumProcessModulesEx(phandle, hMods, sizeof(hMods), &cbNeeded, LIST_MODULES_ALL))
+    //{
+    //    std::cout << "Enumerating process modules..." << std::endl;
+
+    //    MODULEINFO moduleInfo;
+    //    std::cout << "Getting module info..." << std::endl;
+
+    //    if (GetModuleInformation(phandle, hMods[30], &moduleInfo, sizeof(MODULEINFO)))
+    //    {
+    //        std::cout << "Base address of module is: " << moduleInfo.lpBaseOfDll << std::endl;
+    //        std::cout << "Base address of module in decimal is: " << reinterpret_cast<DWORD64>(moduleInfo.lpBaseOfDll) << std::endl;
+
+    //        char lpFilename[BUFFER_SIZE];
+    //        if (GetModuleFileNameExA(phandle, hMods[30], lpFilename, BUFFER_SIZE)) std::cout << "Module file name is: " << lpFilename << std::endl;
+
+    //        auto findPattern = [] (MODULEINFO moduleInfo, HANDLE phandle)
+    //        {
+    //            DWORD64 baseAddress = reinterpret_cast<DWORD64>(moduleInfo.lpBaseOfDll);
+    //            DWORD size = moduleInfo.SizeOfImage;
+
+    //            std::cout << "Size of module is: " << size << std::endl;
+    //            const char* bytes = "\x88\x04\x19\x85\xD2";
+
+    //            // 136, 4, 25, 133, 210
+    //            DWORD64 bytez[5] = {0x88, 0x04, 0x19, 0x85, 0xD2};
+    //            DWORD bytesLength = 5;
+
+    //            for (DWORD i = 0; i < size - bytesLength; i++)
+    //            {
+    //                //DWORD64 val;
+    //                //ReadProcessMemory(phandle, moduleInfo.lpBaseOfDll + i, &val, sizeof(val), NULL);
+    //                //std::cout << "Read val: " << val << std::endl;
+
+    //                for (DWORD j = 0; j < bytesLength; j++)
+    //                {
+    //                    DWORD64 val;
+    //                    ReadProcessMemory(phandle, moduleInfo.lpBaseOfDll + i + j, &val, sizeof(val), NULL);
+
+    //                    BOOL match = bytez[j] == val;
+
+    //                    if (match) {
+    //                        //std::cout << "MATCH" << std::endl;
+    //                        std::cout << "val: " << val << std::endl;
+    //                        if (j == 4) std::cout << "FULL MATCH" << std::endl;
+    //                        std::cout << "j: " << j << std::endl;
+    //                    }
+
+    //                } // End of loop
+
+    //            } // End of loop
+
+    //            return 0;
+    //        };
+
+    //        findPattern(moduleInfo, phandle);
+
+    //        //int readValue;
+    //        //HANDLE phandle = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
+    //        //ReadProcessMemory(phandle, (LPCVOID) a, &readValue, sizeof(readValue), NULL);
+    //        //std::cout << readValue << std::endl;
+    //        //ReadProcessMemory(phandle, moduleInfo.lpBaseOfDll, &readValue, sizeof(readValue), NULL);
+    //        //std::cout << readValue << std::endl;
+
+    //        return reinterpret_cast<DWORD64>(moduleInfo.lpBaseOfDll);
+
+    //    } // End if
+
+    //} // End if
+
+    return 0;
+
+} // End of get base address function
